@@ -1,0 +1,26 @@
+<ui-view on:click="doSomething()" ref:container ></ui-view>
+<script>
+	import dynamic from './dynamic'
+
+	async function load(component) {
+	    let {default: Component} = await dynamic(component.options.data.src)
+        component.options.data.child = new Component(Object.assign(component.options, {target: component.refs.container}))
+    }
+
+	export default {
+	    oncreate() {
+		    load(this).catch(console.error)
+        },
+
+		ondestroy() {
+		    if(this.options.data.child) {
+                this.options.data.child.teardown()
+            }
+		},
+		methods: {
+	        doSomething: function() {
+
+			}
+		}
+	}
+</script>

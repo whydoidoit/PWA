@@ -1,0 +1,22 @@
+version: "3"
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_HOST: "%"
+    command: mysqld --max_allowed_packet=100M
+    volumes:
+      - sql-data-3:/var/lib/mysql
+      - sql-etc-3:/etc
+    ports:
+      - "3307:3306"
+      - "11211:11211"
+volumes:
+  sql-data-3:
+  sql-etc-3:
