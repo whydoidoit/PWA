@@ -1,0 +1,6 @@
+This software "PWA" is (c) Mike Talbot 2017.  
+
+The software in this package is not available for public use
+and anyone obtaining a copy of this software without the
+express permission of 3radical Limited, UK should delete it
+immediately.

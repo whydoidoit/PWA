@@ -1,4 +1,10 @@
 extends layout
 
+block styles
+    style !{styles}
+    script window.__context = !{context}
+
 block content
   .content !{contents}
+  script(src='http://localhost:8081/index.js')
+

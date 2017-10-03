@@ -1,13 +1,4 @@
-import Wrapper from './wrapper'
+import './wrapper/_browser_dynamic'
+import stateRouter from '../states'
 
-const wrapper = new Wrapper({
-    target: document.body,
-    data: {
-        src: 'basic/deep',
-        name: 'Banana'
-    }
-})
-
-document.addEventListener('click', ()=>{
-    wrapper.teardown()
-})
+stateRouter.evaluateCurrentRoute(window.__context.state || 'app.home', {id: 123})

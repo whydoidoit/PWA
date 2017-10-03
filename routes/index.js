@@ -1,84 +1,59 @@
 const express = require('express');
 require('svelte/ssr/register')
 const router = express.Router();
-const StateRouter = require('abstract-state-router')
-const HashBrownRouter = require('hash-brown-router')
-const EventEmitter = require('eventemitter3')
-const Wrapper = require('../components/wrapper/index.html')
-const dynamic = require('../components/wrapper/dynamic')
-const parse5 = require('parse5')
-let output, _id = 0
+const stateRouter = require('../states')
+const events = require('../events')
+const shortid = require('shortid')
+const redis = require('3r/redis')
 
-function getView(ast) {
-    for (let i = 0; i < ast.childNodes.length; i++) {
-        let child = ast.childNodes[i]
-        if (child.tagName === 'ui-view') return child
+function createUserRouter(user) {
+    user.router = Object.assign({}, stateRouter)
+    let go = user.router.go
+    user.stateParameters = user.stateParameters || {}
+    user.router.go = async function (state, parameters, options) {
+        user.state = state
+        user.stateParameters = parameters
+        return user
     }
-    for (let i = 0; i < ast.childNodes.length; i++) {
-        let child = ast.childNodes[i]
-        let result = getView(child)
-        if (result) return result
-    }
-    return null
+    return user
 }
-
-function renderer(asr) {
-    return {
-        async render(info, cb) {
-            let Component = await dynamic(info.template)
-            console.log(info)
-            let result = parse5.parseFragment(Component.render(info.content))
-            let view = getView(info.element)
-            view.childNodes.length = 0
-            Array.prototype.push.apply(view.childNodes, result.childNodes)
-            console.log(parse5.serialize(info.element))
-            cb(null, result)
-            return result
-        },
-        getChildElement(element, cb) {
-            cb(null, element)
-        },
-        reset(info) {
-
-        },
-        destroy(element) {
-
-        }
-
-    }
-}
-
-
-
-var stateRouter = StateRouter(renderer)
-
-stateRouter.addState({
-    name: 'app',
-    route: '/',
-    data: {
-        name: 'mike'
-    },
-    template: 'holder',
-    activate: function() {
-        console.log("here")
-    }
-})
-
-stateRouter.addState({
-    name: 'app.home',
-    route: 'home',
-    data: {
-        surname: 'talbot'
-    },
-    template: 'basic',
-    activate: function () {
-        console.log("and here")
-    }
-})
 
 /* GET home page. */
 router.get('/', async function (req, res, next) {
-    res.render('index', {contents: await stateRouter.renderAsHTML('app.home')});
-});
+    var id = req.cookies.routerId
+    var user
+    if (!id) {
+        id = shortid.generate()
+        user = {}
+        await events.emitAsync(`initialize:${id}`, user)
+    } else {
+        user = JSON.parse((await redis.get(`--router-state--${id}`)) || "{}")
+    }
+    createUserRouter(user)
+    await events.emitAsync(`retrieve:${id}`, user)
+    res.cookie('routerId', id, {maxAge: 1000 * 60 * 60 * 24 * 7 * 12})
+    var state = await stateRouter.go(user.state || 'app.home', user.stateParameters, null, user)
+    delete user.router
+    await redis.set(`--router-state--${id}`, JSON.stringify(user))
+    res.render('index', {contents: state.html, styles: state.css, context: JSON.stringify(user)});
+})
 
-module.exports = router;
+router.post('/raiseEvent', async function (req, res) {
+    try {
+        var id = req.cookies.routerId
+        if (!id) {
+            res.status(404).send("User not found")
+            return
+        }
+        var user = JSON.parse((await redis.get(`--router-state--${id}`)) || "{}")
+        createUserRouter(user)
+        await events.emitAsync.apply(events, [req.body.event, user].concat(req.body.parameters.split(',')))
+        delete user.router
+        await redis.set(`--router-state--${id}`, JSON.stringify(user))
+        res.status(200).redirect(req.headers.referer)
+    } catch (e) {
+        console.error(e)
+    }
+})
+
+module.exports = router

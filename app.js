@@ -4,10 +4,10 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
+global.dynamic = require('./components/wrapper/_node_dynamic')
 var index = require('./routes/index');
 var users = require('./routes/users');
-
+require('3r/config').set(require('./config.json'))
 var app = express();
 
 // view engine setup

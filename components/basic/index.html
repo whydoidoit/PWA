@@ -1,20 +1,17 @@
-<h1 on:click="click('message')" >Hello</h1>
+<Clickable event="clicked:{id}">
+	{{id}} Hello Mr {{firstname}} {{surname}}
+</Clickable>
 <style>
-	h1 { font-size: 20px; }
+	h1 {
+		font-size: 20px;
+	}
 </style>
 <script>
-	export default {
-	    oncreate(info) {
-	        console.log(info)
-		},
+    import Clickable from '../clickable/index.html'
 
-		ondestroy(info) {
-	        console.log(info)
-		},
-		methods: {
-	        click: function(message) {
-	            console.log("Clicked" + message)
-			}
-		}
-	}
+    export default {
+        components: {
+            Clickable
+        }
+    }
 </script>

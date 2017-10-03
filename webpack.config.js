@@ -1,18 +1,25 @@
 const webpack = require('webpack');
 const path = require('path');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
     entry: {
         index: './components/index'
     },
     resolve: {
-        extensions: [ '.js', '.html' ]
+        extensions: ['.js', '.html']
     },
     output: {
         path: path.resolve(__dirname, 'public'),
         filename: '[name].js',
-        chunkFilename: "[name].[id].js"
+        chunkFilename: "chunk.[id].js",
+        publicPath: "http://localhost:8081/"
     },
+    externals: {
+        "parse5": "parse5",
+        "import-export": "imp"
+    },
+
     devtool: '#inline-source-map',
     devServer: {
         contentBase: './public',
@@ -26,16 +33,51 @@ module.exports = {
             "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
         }
     },
+    plugins: [
+        new webpack.DefinePlugin({
+            BROWSER: JSON.stringify(true)
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            children: true,
+            minChunks: 3
+        }),
+        // new UglifyJSPlugin({
+        //     sourceMap: true,
+        //     uglifyOptions: {ecma: 5, compress: {
+        //         unsafe_math: true,
+        //         unsafe_proto: true,
+        //         unsafe_Func: true,
+        //         dead_code: true,
+        //         properties: true,
+        //         evaluate: true,
+        //         conditionals: true,
+        //         unused: true,
+        //         if_returm: true,
+        //         join_vars: true,
+        //         cascade: true,
+        //         reduce_vars: true,
+        //         collapse_vars: true
+        //
+        //     }}
+        // })
+    ],
     module: {
         loaders: [{
             test: /\.(html|js)$/,
-            exclude: [/node_modules/, "/node_modules"],
+            // exclude: [/node_modules/, "/node_modules"],
             use: {
                 loader: 'babel-loader',
                 options: {
-                    presets: ['es2015', 'es2017'],
+                    presets: [
+                        ["env", {
+                            "useBuiltIns": "usage",
+                            "targets": {
+                                "browsers": ["last 2 versions"]
+                            }
+                        }]
+                    ],
                     plugins:
-                        [require('babel-plugin-syntax-dynamic-import'), 'transform-runtime']
+                        ['transform-runtime', require('babel-plugin-syntax-dynamic-import')]
 
                 }
             }
@@ -45,10 +87,12 @@ module.exports = {
             use: {
                 loader: 'svelte-loader',
                 options: {
-                    format: 'es'
+                    format: 'es',
+                    hydratable: true,
+                    css: false
                 }
             }
-        },{
+        }, {
             test: /\.scss$/,
             use: [{
                 loader: "style-loader"

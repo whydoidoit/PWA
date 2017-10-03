@@ -1,4 +1,4 @@
-<ui-view on:click="doSomething()" ref:container ></ui-view>
+<ui-view ref:container ></ui-view>
 <script>
 	import dynamic from './dynamic'
 
@@ -16,11 +16,6 @@
 		    if(this.options.data.child) {
                 this.options.data.child.teardown()
             }
-		},
-		methods: {
-	        doSomething: function() {
-
-			}
 		}
 	}
 </script>
