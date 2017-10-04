@@ -8,6 +8,7 @@ var stateRouter = StateRouter(clientRenderer, '#here', {
     }
 })
 
+
 stateRouter.on('add', function (state, isServer) {
     state.activate = svelteActivate
     if (!isServer) {
@@ -157,6 +158,11 @@ events.on('retrieve:*', function(user) {
     user.info = user.info || "Information data"
 })
 
+events.on('initialize:*', function(user) {
+    user.router.go('app.home', {id: 123})
+})
+
 events.on('clicked:*', async function(user) {
-    await user.router.go('app')
+    await user.router.go('app', {id: 123})
+    save()
 })

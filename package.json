@@ -9,9 +9,9 @@
         "version": "webpack -v"
     },
     "dependencies": {
-        "3r": "git+https://whydoidoit@bitbucket.org/3radicalDev/3r_library.git",
+        "3r": "file:../3r/src/node_modules/3r",
         "abstract-state-router": "^5.17.0",
-        "asr-iso": "^1.0.4",
+        "asr-iso": "file:../asr-server-side/asr-iso",
         "babel-loader": "^7.1.2",
         "babel-polyfill": "^6.26.0",
         "babel-runtime": "^6.26.0",

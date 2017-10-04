@@ -37,10 +37,10 @@ module.exports = {
         new webpack.DefinePlugin({
             BROWSER: JSON.stringify(true)
         }),
-        new webpack.optimize.CommonsChunkPlugin({
-            children: true,
-            minChunks: 3
-        }),
+        // new webpack.optimize.CommonsChunkPlugin({
+        //     children: true,
+        //     minChunks: 3
+        // }),
         // new UglifyJSPlugin({
         //     sourceMap: true,
         //     uglifyOptions: {ecma: 5, compress: {
@@ -64,6 +64,11 @@ module.exports = {
     module: {
         loaders: [{
             test: /\.(html|js)$/,
+            exclude: [
+                /node_modules\/babel-/m,
+                /node_modules\/core-js\//m,
+                /node_modules\/regenerator-runtime\//m
+            ],
             // exclude: [/node_modules/, "/node_modules"],
             use: {
                 loader: 'babel-loader',

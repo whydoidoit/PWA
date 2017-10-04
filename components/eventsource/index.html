@@ -1,22 +1,10 @@
-<form ref:form class="form" action="/raiseEvent" method="post">
+<form ref:form class="form" on:submit="click(event)" action="/raiseEvent" method="post">
 	<slot></slot>
 	<input type="hidden" name="event" value="{{event}}">
 	<input type="hidden" name="parameters" value='{{parameters}}'>
-	<button class="button" on:click="click(event)" type="submit"></button>
 </form>
 
 <style>
-	.button {
-		position: absolute;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		width: 100%;
-		height: 100%;
-		opacity: 0;
-	}
-
 	.form {
 		position: relative;
 	}
@@ -49,3 +37,4 @@
     }
 
 </script>
+
